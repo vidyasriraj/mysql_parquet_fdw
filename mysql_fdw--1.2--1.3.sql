@@ -1,0 +1,4 @@
+CREATE OR REPLACE FUNCTION writeToParquet(query TEXT, file_path TEXT)
+RETURNS void
+AS 'MODULE_PATHNAME', 'writeToParquet'
+LANGUAGE C STRICT;
