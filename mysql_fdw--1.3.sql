@@ -38,7 +38,7 @@ RETURNS SETOF record
 LANGUAGE C PARALLEL SAFE;
 
 
-CREATE OR REPLACE FUNCTION writeToParquet(query TEXT, file_path TEXT)
+CREATE OR REPLACE FUNCTION write_to_parquet(query TEXT, output_path TEXT)
 RETURNS void
-AS 'MODULE_PATHNAME', 'writeToParquet'
+AS 'MODULE_PATHNAME', 'write_to_parquet'
 LANGUAGE C STRICT;

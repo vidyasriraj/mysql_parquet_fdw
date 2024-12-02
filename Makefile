@@ -5,7 +5,8 @@
 #
 
 MODULE_big = mysql_fdw
-OBJS = connection.o option.o deparse.o mysql_query.o mysql_fdw.o mysql_pushability.o write_pg_to_parquet.o
+OBJS = connection.o option.o deparse.o mysql_query.o mysql_fdw.o mysql_pushability.o postgres_parquet.o parquet_writer.o
+
 
 EXTENSION = mysql_fdw
 DATA = mysql_fdw--1.0.sql mysql_fdw--1.1.sql mysql_fdw--1.0--1.1.sql mysql_fdw--1.2.sql mysql_fdw--1.1--1.2.sql mysql_fdw--1.3.sql mysql_fdw--1.2--1.3.sql mysql_fdw_pushdown.config
@@ -33,9 +34,27 @@ endif
 
 PG_CPPFLAGS += -D _MYSQL_LIBNAME=\"lib$(MYSQL_LIB)$(DLSUFFIX)\"
 
-PG_CPPFLAGS += -I$(HOME)/include/arrow -I$(HOME)/include/parquet
-SHLIB_LINKS = -L$(HOME)/lib -larrow -lparquet 
-CPPFLAGS = -std=c++17 -I~/postgres/include -I~/include 
+PG_CPPFLAGS += -I$(HOME)/include/arrow
+PG_CPPFLAGS += -I$(HOME)/include/parquet 
+PG_CPPFLAGS += -I$(HOME)/include/parquet/arrow
+SHLIB_LINKS = -L$(HOME)/lib -larrow -lparquet -larrow_dataset -lstdc++
+CXX = g++
+CXXFLAGS = -std=c++13 -Wall -Werror
+CPPFLAGS =  -I$(HOME)/include 
+LDFLAGS += -L$(HOME)/lib -larrow -lparquet -lstdc++
+
+SHLIB_LINK += -L/home/killi-pt7716/lib -larrow -lparquet
+PG_CXXFLAGS += -std=c++17
+SHLIB_LINK += -lstdc++
+
+# Add Arrow and Parquet include and library directories
+ARROW_CFLAGS = $(shell pkg-config --cflags arrow)
+ARROW_LIBS = $(shell pkg-config --libs arrow)
+PARQUET_CFLAGS = $(shell pkg-config --cflags parquet)
+PARQUET_LIBS = $(shell pkg-config --libs parquet)
+
+PG_CPPFLAGS += $(ARROW_CFLAGS) $(PARQUET_CFLAGS)
+SHLIB_LINK += $(ARROW_LIBS) $(PARQUET_LIBS)
 
 ifdef USE_PGXS
 PG_CONFIG = pg_config
