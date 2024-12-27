@@ -68,25 +68,3 @@ arrow::Status WriteToParquet(const std::vector<std::string>& column_names,
     return writer->Close();
 }
 
-arrow::Status ReadFromParquet(const std::string& input_path, std::vector<std::vector<std::string>>& data) {
-    // Create a file input stream
-    std::shared_ptr<arrow::io::FileInputStream> infile;
-    ARROW_ASSIGN_OR_RAISE(infile, arrow::io::FileInputStream::Open(input_path));
-
-    // Create a Parquet reader
-    std::unique_ptr<parquet::arrow::FileReader> reader;
-    PARQUET_ASSIGN_OR_THROW(reader, parquet::arrow::FileReader::Open(*infile));  
-
-    // Read the table from the Parquet file and convert it to a vector of vectors
-    std::shared_ptr<arrow::Table> table;        
-    PARQUET_ASSIGN_OR_THROW(table, reader->ReadTable());    
-    for (size_t row = 0; row < table->num_rows(); ++row) {
-        std::vector<std::string> row_data;
-        for (size_t col = 0; col < table->num_columns(); ++col) {
-            auto value = table->column(col)->GetView(row);
-            row_data.push_back(value.ToString());
-        }
-        data.push_back(row_data);
-    }
-    return arrow::Status::OK(); 
-    }
